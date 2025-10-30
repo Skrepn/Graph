@@ -1,0 +1,5 @@
+package_name,my_package
+repo_url_or_path,https://github.com/Skrepn/Graph.git
+repo_mode,
+package_version,1.2.3
+filter_substring,lib
