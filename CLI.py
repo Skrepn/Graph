@@ -1,9 +1,10 @@
 import csv
 import sys
+import re
 
 REQUIRED_KEYS = {
     "package_name",
-    "repo_url_or_path",
+    "repo_url",
     "repo_mode",
     "package_version",
     "filter_substring"
@@ -17,14 +18,19 @@ def read_config(file_path):
             config = {}
             for row in reader:
                 if len(row) != 2:
-                    print("Ошибка в параметре: неправильный формат строки")
+                    print("Ошибка: неправильный формат строки")
                     sys.exit(1)
                 key, value = row
+                key = key.strip()
+                value = value.strip()
+                if key not in REQUIRED_KEYS:
+                    print(f"Ошибка: неизвестный параметр {key}")
+                    sys.exit(1)
                 # Сохраняем параметр в словарь
-                config[key.strip()] = value.strip()
+                config[key] = value
             return config
-    except:
-        print("Ошибка: файл не открывается")
+    except FileNotFoundError:
+        print("Ошибка: файл не найден")
         sys.exit(1)
 
 def validate(config):
@@ -32,15 +38,15 @@ def validate(config):
         print("Ошибка в параметре: package_name")
         sys.exit(1)
 
-    if not config["repo_url_or_path"]:
-        print("Ошибка в параметре: repo_url_or_path")
+    if not config["repo_url"] or not (re.match(r"^https?://", config["repo_url"])):
+        print("Ошибка в параметре: repo_url")
         sys.exit(1)
 
     if config["repo_mode"] not in ("local", "remote"):
         print("Ошибка в параметре: repo_mode")
         sys.exit(1)
 
-    if not config["package_version"]:
+    if not config["package_version"] or not re.fullmatch(r"\d[\w.\-\+]*", config["package_version"]):
         print("Ошибка в параметре: package_version")
         sys.exit(1)
 
@@ -61,3 +67,4 @@ def main():
         print(f"{key}: {value}")
 
 main()
+
